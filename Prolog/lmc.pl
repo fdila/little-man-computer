@@ -11,10 +11,6 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
 									lmc_sum(Acc, Num, Acc2, Flag),
 									PC2 is mod(PC + 1, 100),
 									!.
-
-lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
-lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
-
 %Sottrazione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
 								state(Acc2, PC2, Mem, In, Out, Flag)) :-
@@ -26,10 +22,6 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
 									lmc_sub(Acc, Num, Acc2, Flag),
 									PC2 is mod(PC + 1, 100),
 									!.
-
-lmc_sub(Acc, Num, Acc2, 0) :- Acc2 is Acc - Num, Acc2 > 0, !.
-lmc_sub(Acc, Num, Acc2, 1) :- Acc2 is Acc - Num + 1000.
-
 %Store
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 								state(Acc, PC2, Mem2, In, Out, Flag)) :-
@@ -71,11 +63,6 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									lmc_branch_zero(Acc, PC, PCBranch, Flag, PC2),
 									!.
 
-lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
-lmc_branch_zero(_, PC, _, _, PC2) :-
-									PC2 is mod(PC + 1, 100),
-									!.
-
 %Branch if positive
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 								state(Acc, PC2, Mem, In, Out, Flag)) :-
@@ -85,11 +72,6 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									PCBranch is Inst - 800,
 									lmc_branch_positive(PC, PCBranch, Flag, PC2),
 									!.
-
-lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
-lmc_branch_positive(PC, _, flag, PC2) :-
-											PC2 is mod(PC + 1, 100),
-											!.
 
 %Input
 one_instruction(state(_, PC, Mem, In, Out, Flag),
@@ -116,3 +98,19 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									Inst < 100,
 									PC2 is mod(PC + 1, 100),
 									!.
+
+lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
+lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
+
+lmc_sub(Acc, Num, Acc2, 0) :- Acc2 is Acc - Num, Acc2 > 0, !.
+lmc_sub(Acc, Num, Acc2, 1) :- Acc2 is Acc - Num + 1000.
+
+lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
+lmc_branch_zero(_, PC, _, _, PC2) :-
+									PC2 is mod(PC + 1, 100),
+									!.
+
+lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
+lmc_branch_positive(PC, _, flag, PC2) :-
+											PC2 is mod(PC + 1, 100),
+											!.
