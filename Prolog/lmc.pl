@@ -99,6 +99,8 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									PC2 is mod(PC + 1, 100),
 									!.
 
+
+%Predicati richiamati dalle one_instruction
 lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
 lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
 
@@ -114,3 +116,9 @@ lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_positive(PC, _, flag, PC2) :-
 											PC2 is mod(PC + 1, 100),
 											!.
+
+execution_loop(halted_state(_, _, _, _, Out, _), Out).
+execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
+								one_instruction(state(Acc, PC, Mem, In, Out, Flag),
+																NewState),
+								execution_loop(NewState, Out2).
