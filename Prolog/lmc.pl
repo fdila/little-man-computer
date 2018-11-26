@@ -9,7 +9,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
 									Pos is Inst - 100,
 									nth0(Pos, Mem, Num, _),
 									lmc_sum(Acc, Num, Acc2, Flag),
-									PC2 is PC + 1,
+									PC2 is mod(PC + 1, 100),
 									!.
 
 lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
@@ -24,7 +24,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
 									Pos is Inst - 200,
 									nth0(Pos, Mem, Num, _),
 									lmc_sub(Acc, Num, Acc2, Flag),
-									PC2 is PC + 1,
+									PC2 is mod(PC + 1, 100),
 									!.
 
 lmc_sub(Acc, Num, Acc2, 0) :- Acc2 is Acc - Num, Acc2 > 0, !.
@@ -39,7 +39,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									Pos is Inst - 300,
 									nth0(Pos, Mem, _, Rest),
     							nth0(Pos, Mem2, Acc, Rest),
-									PC2 is PC + 1,
+									PC2 is mod(PC + 1, 100),
 									!.
 
 %Load
