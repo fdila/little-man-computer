@@ -1,5 +1,15 @@
 %% -*- Mode: Prolog -*-
 
+%% necessario per evitare che prolog mi metta i puntini
+%% su cose troppo lunghe
+/*
+:- set_prolog_flag(answer_write_options,
+                   [ quoted(true),
+                     portray(true),
+                     spacing(next_argument)
+                   ]).
+*/
+									 
 % Addizione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
 								state(Acc2, PC2, Mem, In, Out, Flag)) :-
@@ -104,8 +114,8 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
 lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
 
-lmc_sub(Acc, Num, Acc2, 0) :- Acc2 is Acc - Num, Acc2 > 0, !.
-lmc_sub(Acc, Num, Acc2, 1) :- Acc2 is Acc - Num + 1000.
+lmc_sub(Acc, Num, Acc2, noflag) :- Acc2 is Acc - Num, Acc2 >= 0, !.
+lmc_sub(Acc, Num, Acc2, flag) :- Acc2 is Acc - Num + 1000.
 
 lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_zero(_, PC, _, _, PC2) :-
@@ -116,9 +126,9 @@ lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_positive(PC, _, flag, PC2) :-
 											PC2 is mod(PC + 1, 100),
 											!.
-
-execution_loop(halted_state(_, _, _, _, Out, _), Out).
+%Execution loop
+execution_loop(halted_state(_, _, _, _, Out, _), Out) :- !.
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
 								one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 																NewState),
-								execution_loop(NewState, Out2).
+								execution_loop(NewState, Out2), !.
