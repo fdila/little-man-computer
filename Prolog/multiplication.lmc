@@ -1,7 +1,7 @@
 // We perfom the multiplication of two numbers
 // by using repeated addition
         inp // get the first number
-        sta FIRST 
+        sta FIRST
         inp // get the second number
 LOOP    brz END
         sub ONE
@@ -15,7 +15,7 @@ LOOP    brz END
 END     lda    RESULT
         out
         hlt
-    
+
 // memory locations
 ONE     dat 1 // value "1"
 FIRST   dat // first number location
