@@ -9,7 +9,7 @@
                      spacing(next_argument)
                    ]).
 */
-									 
+
 % Addizione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
 								state(Acc2, PC2, Mem, In, Out, Flag)) :-
@@ -112,10 +112,10 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 
 %Predicati richiamati dalle one_instruction
 lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
-lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
+lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is mod(Acc + Num, 100).
 
 lmc_sub(Acc, Num, Acc2, noflag) :- Acc2 is Acc - Num, Acc2 >= 0, !.
-lmc_sub(Acc, Num, Acc2, flag) :- Acc2 is Acc - Num + 1000.
+lmc_sub(Acc, Num, Acc2, flag) :- Acc2 is mod(Acc - Num, 100).
 
 lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_zero(_, PC, _, _, PC2) :-
