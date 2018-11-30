@@ -2,13 +2,12 @@
 
 %% necessario per evitare che prolog mi metta i puntini
 %% su cose troppo lunghe
-/*
 :- set_prolog_flag(answer_write_options,
                    [ quoted(true),
                      portray(true),
                      spacing(next_argument)
                    ]).
-*/
+
 
 % Addizione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
