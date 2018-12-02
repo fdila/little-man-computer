@@ -46,8 +46,8 @@ lmc_format_instruction_list(String, NewList) :-
                         lmc_remove_comment_line(X, Y),
                         lmc_remove_empty_line(Y, NewList).
 
-lmc_parse_labels([],[], 0).
-lmc_parse_labels([H|T], [Y|Z], [0,Xs]) :-
+lmc_parse_labels([],[],[]).
+lmc_parse_labels([H|T], [Y|Z], [0|Xs]) :-
                       split_string(H, "//", " ", [X|_]),
                       split_string(X, " ", " ", Y),
                       nth0(0, Y, First, _),
