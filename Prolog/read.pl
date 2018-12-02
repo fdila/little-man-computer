@@ -46,11 +46,22 @@ lmc_format_instruction_list(String, NewList) :-
                         lmc_remove_comment_line(X, Y),
                         lmc_remove_empty_line(Y, NewList).
 
+lmc_parse_labels([],[], 0).
+lmc_parse_labels([H|T], [Y|Z], [0,Xs]) :-
+                      split_string(H, "//", " ", [X|_]),
+                      split_string(X, " ", " ", Y),
+                      nth0(0, Y, First, _),
+                      member(First, ["add", "sub", "sta", "lda", "bra", "brz",
+                                  "brp", "inp", "out", "hlt", "halt"]), !,
+                      lmc_parse_labels(T, Z, Xs).
 
-/*
-lmc_load_memory(List, Mem, N) :-
-                nth0(N, List, Elem, NewList),
-                lmc_remove_initial_spaces(Elem, Elem2),
-                lmc_remove_comment().
-                nth0(N, Mem, Elem, NewList).
-*/
+lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
+                          split_string(H, "//", " ", [X|_]),
+                          split_string(X, " ", " ", Y),
+                          nth0(0, Y, Label, Rest),
+                          lmc_parse_labels(T, Z, Xs).
+
+lmc_parse_instructions([H|T], [[OpN|Ind], Z], Labels) :-
+                        split_string(H, " ", " ", [Op|Ind]),
+                        Op = "add",
+                        OpN = 200.
