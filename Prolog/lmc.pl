@@ -1,4 +1,5 @@
 %% -*- Mode: Prolog -*-
+%% Federica Di Lauro 829470
 :- use_module(library(readutil)).
 % Addizione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
