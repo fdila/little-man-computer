@@ -51,7 +51,8 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									nth0(PC, Mem, Inst, _),
 									Inst > 599,
 									Inst < 700,
-									PC2 is Inst - 600.
+									PC2 is Inst - 600,
+                  !.
 
 %Branch if zero
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
@@ -91,7 +92,6 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 									!.
 
 %Halt
-%TODO come fermare esecuzione programma?
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 								halted_state(Acc, PC2, Mem, In, Out, Flag)) :-
 									nth0(PC, Mem, Inst, _),
@@ -102,10 +102,10 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 
 %Predicati richiamati dalle one_instruction
 lmc_sum(Acc, Num, Acc2, noflag) :- Acc2 is Acc + Num, Acc2 <1000, !.
-lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is mod(Acc + Num, 100).
+lmc_sum(Acc, Num, Acc2, flag) :- Acc2 is Acc + Num - 1000.
 
 lmc_sub(Acc, Num, Acc2, noflag) :- Acc2 is Acc - Num, Acc2 >= 0, !.
-lmc_sub(Acc, Num, Acc2, flag) :- Acc2 is mod(Acc - Num, 100).
+lmc_sub(Acc, Num, Acc2, flag) :- Acc2 is Acc - Num + 1000.
 
 lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_zero(_, PC, _, _, PC2) :-
@@ -116,12 +116,13 @@ lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_positive(PC, _, flag, PC2) :-
 											PC2 is mod(PC + 1, 100),
 											!.
-%Execution loop
-execution_loop(halted_state(_, _, _, _, Out, _), Out) :- !.
+
+execution_loop(halted_state(_, _, _, _, Out, _), Out).
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
 								one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 																NewState),
-								execution_loop(NewState, Out2), !.
+								execution_loop(NewState, Out2).
+
 
 lmc_open_file(File, List) :-
                 read_file_to_codes(File, X, []),
@@ -169,63 +170,63 @@ lmc_parse_labels([H|T], [Y|Z], [0|Xs]) :-
 lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
                           split_string(H, "//", " ", [X|_]),
                           split_string(X, " ", " ", Y),
-                          nth0(0, Y, Label, Rest),
+                          nth0(0, Y, Label, Rest),!,
                           lmc_parse_labels(T, Z, Xs).
 
 lmc_parse_instructions([],[],_).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
                         Op = "add",
                         OpN = 100,
-                        number_string(IndN,Ind), !,
+                        number_string(IndN,Ind),!,
                         IndN < 100,
                         MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "add",
                         OpN = 100,
-                        nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        nth0(IndN, Labels, Ind, _),!,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
                         Op = "sub",
                         OpN = 200,
-                        number_string(IndN,Ind), !,
+                        number_string(IndN,Ind),!,
                         IndN < 100,
                         MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "sub",
                         OpN = 200,
-                        nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        nth0(IndN, Labels, Ind, _),!,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
                         Op = "sta",
                         OpN = 300,
-                        number_string(IndN,Ind), !,
+                        number_string(IndN,Ind),!,
                         IndN < 100,
                         MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "sta",
                         OpN = 300,
-                        nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        nth0(IndN, Labels, Ind, _),!,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
                         Op = "lda",
                         OpN = 500,
-                        number_string(IndN,Ind), !,
+                        number_string(IndN,Ind),!,
                         IndN < 100,
                         MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "lda",
                         OpN = 500,
-                        nth0(IndN, Labels, Ind, _),
+                        nth0(IndN, Labels, Ind, _),!,
                         MemCode is OpN + IndN, !,
                         lmc_parse_instructions(T, Z, Labels).
 
@@ -239,8 +240,8 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "bra",
                         OpN = 600,
-                        nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        nth0(IndN, Labels, Ind, _),!,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
@@ -253,14 +254,14 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "brz",
                         OpN = 700,
-                        nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        nth0(IndN, Labels, Ind, _),!,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
                         Op = "brp",
                         OpN = 800,
-                        number_string(IndN,Ind), !,
+                        number_string(IndN,Ind),!,
                         IndN < 100,
                         MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
@@ -268,43 +269,51 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
                         Op = "brp",
                         OpN = 800,
                         nth0(IndN, Labels, Ind, _),
-                        MemCode is OpN + IndN, !,
+                        MemCode is OpN + IndN,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
-                        Op = "inp",
-                        MemCode = 901, !,
+                        Op = "inp",!,
+                        MemCode = 901,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
-                        Op = "out",
-                        MemCode = 902, !,
+                        Op = "out",!,
+                        MemCode = 902,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
-                        Op = "hlt",
-                        MemCode = 000, !,
+                        Op = "hlt",!,
+                        MemCode = 000,
                         lmc_parse_instructions(T, Z, Labels).
 
 lmc_parse_instructions([[Op, Ind]|T], [IndN| Z], Labels) :-
                         Op = "dat",
-                        number_string(IndN,Ind), !,
-                        IndN < 100,
+                        number_string(IndN,Ind),!,
+                        IndN < 1000,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op, Ind]|T], [IndN | Z], Labels) :-
                         Op = "dat",
-                        nth0(IndN, Labels, Ind, _), !,
+                        nth0(IndN, Labels, Ind, _),!,
                         lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
                         Op = "dat",!,
                         lmc_parse_instructions(T, Z, Labels).
 
-lmc_load(File, Mem) :-
+lmc_pad_mem(Mem, PadMem) :-
+            length(Mem,Length),
+            Length<100,!,
+            append(Mem, [0], NewMem),
+            lmc_pad_mem(NewMem, PadMem).
+lmc_pad_mem(Mem,Mem) :- !.
+
+lmc_load(File, PadMem) :-
               lmc_open_file(File, List),
               lmc_format_instruction_list(List, FormattedList),
               lmc_parse_labels(FormattedList, InstList, Labels),
-              lmc_parse_instructions(InstList, Mem, Labels).
+              lmc_parse_instructions(InstList, Mem, Labels),
+              lmc_pad_mem(Mem,PadMem).
 
 lmc_run(File, In, Out) :-
-							lmc_load(File, Mem),
-							execution_loop(state(0,0,Mem,In,[],noflag), Out).
+							lmc_load(File, Mem),!,
+							execution_loop(state(0, 0, Mem, In, [], noflag), Out).
