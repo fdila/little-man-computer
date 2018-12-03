@@ -116,14 +116,14 @@ lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_positive(PC, _, flag, PC2) :-
 											PC2 is mod(PC + 1, 100),
 											!.
-
+%Execution_loop
 execution_loop(halted_state(_, _, _, _, Out, _), Out).
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
 								one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 																NewState),
 								execution_loop(NewState, Out2).
 
-
+%Operazioni di manipolazione del file
 lmc_open_file(File, List) :-
                 read_file_to_codes(File, X, []),
                 string_codes(Y, X),
@@ -307,13 +307,14 @@ lmc_pad_mem(Mem, PadMem) :-
             lmc_pad_mem(NewMem, PadMem).
 lmc_pad_mem(Mem,Mem) :- !.
 
+%Caricamento in memoria del file
 lmc_load(File, PadMem) :-
               lmc_open_file(File, List),
               lmc_format_instruction_list(List, FormattedList),
               lmc_parse_labels(FormattedList, InstList, Labels),
               lmc_parse_instructions(InstList, Mem, Labels),
               lmc_pad_mem(Mem,PadMem).
-
+%Esecuzione del file
 lmc_run(File, In, Out) :-
 							lmc_load(File, Mem),!,
 							execution_loop(state(0, 0, Mem, In, [], noflag), Out).
