@@ -61,7 +61,19 @@ lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
                           nth0(0, Y, Label, Rest),
                           lmc_parse_labels(T, Z, Xs).
 
-lmc_parse_instructions([H|T], [[OpN|Ind], Z], Labels) :-
-                        split_string(H, " ", " ", [Op|Ind]),
+lmc_parse_instructions([],[],_).
+lmc_parse_instructions([H|T], [MemCode| Z], Labels) :-
+                        split_string(H, " ", " ", [Op,Ind]),
                         Op = "add",
-                        OpN = 200.
+                        OpN = 200,
+                        number_string(IndN,Ind), !,
+                        IndN < 100,
+                        MemCode is OpN + IndN,
+                        lmc_parse_instructions(T, Z, Labels).
+lmc_parse_instructions([H|T], [MemCode | Z], Labels) :-
+                        split_string(H, " ", " ", [Op,Ind]),
+                        Op = "add",
+                        OpN = 200,
+                        nth0(IndN, Labels, Ind, _),
+                        MemCode is OpN + IndN, !,
+                        lmc_parse_instructions(T, Z, Labels).
