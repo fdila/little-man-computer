@@ -1,5 +1,0 @@
-// by using repeated addition
-        inp // get the first number
-
-        inp // get the second number
-LOOP    brz END
