@@ -304,7 +304,7 @@ lmc_load(File, PadMem) :-
     lmc_parse_labels(FormattedList, InstList, Labels),
     lmc_parse_instructions(InstList, Mem, Labels),
     length(Mem,Length),
-    Length <= 100,
+    Length =< 100,
     lmc_pad_mem(Mem,PadMem).
 
 %Esecuzione del file
