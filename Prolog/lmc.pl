@@ -112,6 +112,7 @@ lmc_branch_positive(PC, _, flag, PC2) :-
 %Execution_loop
 execution_loop(halted_state(_, _, _, _, Out, _), Out).
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
+    length(Mem,100),
     one_instruction(state(Acc, PC, Mem, In, Out, Flag),	NewState),
     execution_loop(NewState, Out2).
 
@@ -302,6 +303,8 @@ lmc_load(File, PadMem) :-
     lmc_format_instruction_list(List, FormattedList),
     lmc_parse_labels(FormattedList, InstList, Labels),
     lmc_parse_instructions(InstList, Mem, Labels),
+    length(Mem,Length),
+    Length <= 100,
     lmc_pad_mem(Mem,PadMem).
 
 %Esecuzione del file
