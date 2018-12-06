@@ -155,7 +155,7 @@ lmc_parse_labels([H|T], [Y|Z], [0|Xs]) :-
     split_string(X, " ", " ", Y),
     nth0(0, Y, First, _),
     member(First, ["add", "sub", "sta", "lda", "bra", "brz",
-                   "brp", "inp", "out", "hlt", "halt"]), !,
+                   "brp", "inp", "out", "hlt", "dat"]), !,
     lmc_parse_labels(T, Z, Xs).
 lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
     split_string(H, "//", " ", [X|_]),
