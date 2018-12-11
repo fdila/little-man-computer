@@ -291,7 +291,7 @@ lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
 
 lmc_pad_mem(Mem, PadMem) :-
     length(Mem,Length),
-    Length<100, !,
+    Length < 100, !,
     append(Mem, [0], NewMem),
     lmc_pad_mem(NewMem, PadMem).
 lmc_pad_mem(Mem, Mem) :- !.
