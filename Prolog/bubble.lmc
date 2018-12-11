@@ -1,0 +1,74 @@
+inputLoop INP
+BRZ sortLoop
+store DAT 380
+LDA store
+ADD increment
+STA store
+LDA listSize
+ADD increment
+STA listSize
+BRA inputLoop
+sortLoop LDA listSize
+SUB increment
+STA loopCount
+LDA zero
+STA isChange 
+load1 DAT 580
+STA buffA
+load2 DAT 581
+STA buffB
+cmp SUB buffA
+BRP nextItem
+swap LDA buffB
+store1 DAT 380
+LDA buffA
+store2 DAT 381
+LDA increment
+STA isChange 
+nextItem LDA store1
+ADD increment
+STA store1
+ADD increment
+STA store2
+LDA load1
+ADD increment
+STA load1
+ADD increment
+STA load2
+LDA loopCount
+SUB increment
+STA loopCount
+BRZ isFinished
+BRA load1
+isFinished LDA isChange
+BRZ outputList
+resetLoop LDA lda1
+STA load1
+ADD increment
+STA load2
+LDA sta1
+STA store1
+ADD increment
+STA store2
+BRA sortLoop
+outputList DAT 580
+OUT
+LDA outputList
+ADD increment
+STA outputList
+LDA listSize
+SUB increment
+STA listSize
+BRZ end
+BRA outputList
+end HLT
+
+zero DAT 0
+buffA DAT 0
+buffB DAT 0
+isChange DAT 0
+increment DAT 1
+listSize DAT 0
+loopCount DAT 0
+sta1 DAT 380
+lda1 DAT 580
