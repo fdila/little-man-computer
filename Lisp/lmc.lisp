@@ -124,7 +124,7 @@
                  :in in-new
                  :out out
                  :flag flag)))
-        ;;OUT
+        ;; OUT
         ((eql inst 902)
          (let ((out-new (append out (list acc))))
            (list 'state
@@ -134,6 +134,15 @@
                  :in in
                  :out out-new
                  :flag flag)))
+        ;; HALT
+        ((and (> inst -1) (< 100))
+         (list 'halted-state
+               :acc acc
+               :pc pc-inc
+               :mem mem
+               :in in
+               :out out
+               :flag flag))
         ))
     )
   )
