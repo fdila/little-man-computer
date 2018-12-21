@@ -113,6 +113,17 @@
                    :in in
                    :out out
                    :flag flag))))
+        ;; INPUT
+        ((eql inst 901)
+         (let ((acc-new (first in))
+               (in-new (rest in)))
+           (list 'state
+                 :acc acc-new
+                 :pc pc-inc
+                 :mem mem
+                 :in in-new
+                 :out out
+                 :flag flag)))
         ))
     )
   )
