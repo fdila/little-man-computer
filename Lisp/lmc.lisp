@@ -67,6 +67,16 @@
                  :in in
                  :out out
                  :flag flag)))
+        ;; BRANCH
+        ((and (> inst 599) (< inst 700))
+         (let ((pc-branch (nth (- inst 600) mem)))
+           (list 'state
+                 :acc acc
+                 :pc pc-branch
+                 :mem mem
+                 :in in
+                 :out out
+                 :flag flag)))
         ))
     )
   )
