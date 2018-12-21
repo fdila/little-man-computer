@@ -14,7 +14,7 @@
         ;; Gestione istruzione non esistente
         ((or (eql inst 900)
              (and (> inst 902))
-             (and (> inst 399) (< inst 600)))
+             (and (> inst 399) (< inst 500)))
          (error "Errore, istruzione non valida"))
         ;; Gestione one-instruction su halted-state
         ((eql state-val 'halted-state)
@@ -78,7 +78,7 @@
                  :flag flag)))
         ;; BRANCH
         ((and (> inst 599) (< inst 700))
-         (let ((pc-branch (nth (- inst 600) mem)))
+         (let ((pc-branch (- inst 600)))
            (list 'state
                  :acc acc
                  :pc pc-branch
@@ -88,7 +88,7 @@
                  :flag flag)))
         ;; BRANCH IF ZERO
         ((and (> inst 699) (< inst 800))
-         (let ((pc-branch (nth (- inst 700) mem)))
+         (let ((pc-branch (- inst 700)))
            (if (and (eql acc 0) (eql flag 'noflag))
              (list 'state
                    :acc acc
@@ -106,7 +106,7 @@
                    :flag flag))))
         ;; BRANCH IF POSITIVE
         ((and (> inst 799) (< inst 900))
-         (let ((pc-branch (nth (- inst 800) mem)))
+         (let ((pc-branch (- inst 800)))
            (if (eql flag 'noflag)
              (list 'state
                    :acc acc
@@ -123,7 +123,6 @@
                    :out out
                    :flag flag))))
         ;; INPUT
-        ; TODO gestione input vuoto
         ((eql inst 901)
          (let ((acc-new (first in))
                (in-new (rest in)))
@@ -154,7 +153,14 @@
                :mem mem
                :in in
                :out out
-               :flag flag))
-        ))
-    )
-  )
+               :flag flag))))))
+
+(defun execution-loop (state)
+  (let ((state-val (nth 0 state))
+        (out (nth 10 state)))
+    ; chiama ricorsivamente l'execution loop fino a che non trova halted-state
+    (cond
+      ((eql state-val 'state)
+       (execution-loop (one-instruction state)))
+      ((eql state-val 'halted-state)
+       out))))
