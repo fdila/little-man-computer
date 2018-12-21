@@ -1,6 +1,7 @@
 (defun one-instruction (state)
   (let
-    ((acc (nth 2 state))
+    ((state-val (nth 0 state))
+     (acc (nth 2 state))
      (pc (nth 4 state))
      (mem (nth 6 state))
      (in (nth 8 state))
@@ -10,6 +11,14 @@
       ((inst (nth pc mem))
        (pc-inc (mod (+ pc 1) 100)))
       (cond
+        ;; Gestione istruzione non esistente
+        ((or (eql inst 900)
+             (and (> inst 902))
+             (and (> inst 399) (< inst 600)))
+         (error "Errore, istruzione non valida"))
+        ;; Gestione one-instruction su halted-state
+        ((eql state-val 'halted-state)
+         (error "Errore, istruzione non eseguibile se lo state è halted"))
         ;; ADD
         ((and (> inst 99) (< inst 200))
          (let ((sum (+ acc (nth (- inst 100) mem))))
