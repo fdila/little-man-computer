@@ -57,6 +57,16 @@
                  :in in
                  :out out
                  :flag flag)))
+        ;; LOAD
+        ((and (> inst 499) (< inst 600))
+         (let ((new-acc (nth (- inst 500) mem)))
+           (list 'state
+                 :acc new-acc
+                 :pc new-pc
+                 :mem mem
+                 :in in
+                 :out out
+                 :flag flag)))
         ))
     )
   )
