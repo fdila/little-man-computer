@@ -95,6 +95,24 @@
                    :in in
                    :out out
                    :flag flag))))
+        ;; BRANCH IF POSITIVE
+        ((and (> inst 799) (< inst 900))
+         (let ((pc-branch (nth (- inst 800) mem)))
+           (if (eql flag 'noflag)
+             (list 'state
+                   :acc acc
+                   :pc pc-branch
+                   :mem mem
+                   :in in
+                   :out out
+                   :flag flag)
+             (list 'state
+                   :acc acc
+                   :pc pc-inc
+                   :mem mem
+                   :in in
+                   :out out
+                   :flag flag))))
         ))
     )
   )
