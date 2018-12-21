@@ -123,16 +123,19 @@
                    :out out
                    :flag flag))))
         ;; INPUT
+        ; TODO gestione input vuoto
         ((eql inst 901)
          (let ((acc-new (first in))
                (in-new (rest in)))
-           (list 'state
-                 :acc acc-new
-                 :pc pc-inc
-                 :mem mem
-                 :in in-new
-                 :out out
-                 :flag flag)))
+           (if (eql acc-new NIL)
+             (error "Istruzione di input con :in vuoto")
+             (list 'state
+                   :acc acc-new
+                   :pc pc-inc
+                   :mem mem
+                   :in in-new
+                   :out out
+                   :flag flag))))
         ;; OUT
         ((eql inst 902)
          (let ((out-new (append out (list acc))))
