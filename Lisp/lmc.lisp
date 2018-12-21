@@ -8,7 +8,7 @@
      (flag (nth 12 state)))
     (let
       ((inst (nth pc mem))
-       (new-pc (mod (+ pc 1) 100)))
+       (pc-inc (mod (+ pc 1) 100)))
       (cond
         ;; ADD
         ((and (> inst 99) (< inst 200))
@@ -16,14 +16,14 @@
            (if (< sum 1000)
              (list 'state
                    :acc sum
-                   :pc new-pc
+                   :pc pc-inc
                    :mem mem
                    :in in
                    :out out
                    :flag 'noflag)
              (list 'state
                    :acc (mod sum 1000)
-                   :pc new-pc
+                   :pc pc-inc
                    :mem mem
                    :in in
                    :out out
@@ -34,14 +34,14 @@
            (if (> sub 0)
              (list 'state
                    :acc sub
-                   :pc new-pc
+                   :pc pc-inc
                    :mem mem
                    :in in
                    :out out
                    :flag 'noflag)
              (list 'state
                    :acc (mod sub 1000)
-                   :pc new-pc
+                   :pc pc-inc
                    :mem mem
                    :in in
                    :out out
@@ -52,7 +52,7 @@
            (setf (nth addr mem) acc)
            (list 'state
                  :acc acc
-                 :pc new-pc
+                 :pc pc-inc
                  :mem mem
                  :in in
                  :out out
@@ -62,7 +62,7 @@
          (let ((new-acc (nth (- inst 500) mem)))
            (list 'state
                  :acc new-acc
-                 :pc new-pc
+                 :pc pc-inc
                  :mem mem
                  :in in
                  :out out
@@ -90,7 +90,7 @@
                    :flag flag)
              (list 'state
                    :acc acc
-                   :pc new-pc
+                   :pc pc-inc
                    :mem mem
                    :in in
                    :out out
