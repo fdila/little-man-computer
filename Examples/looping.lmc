@@ -1,0 +1,27 @@
+// Questo programma esegue due cicli innestati senza produrre nessun
+// output alla fine. Ad ogni ciclo piu' interno stampa il valore
+// dell'indice del ciclo interno (10000 valori di output totali)
+lda zero //notare che questo assembly e' case-insensitive
+sta i //e quindi riferirsi alla stessa etichetta in maiuscolo
+L1 lda zero //e in minuscolo e' valido
+sta j
+L2 lda j
+out
+add one
+sta j
+sub M
+brp END2
+bra L2
+END2 lda i
+add one
+sta i
+sub N
+brp END1
+bra L1
+END1 hlt
+ZERO dat 0
+ONE dat 1
+I dat 0
+J dat 0
+N dat 100
+M dat 100
