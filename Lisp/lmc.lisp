@@ -164,3 +164,126 @@
        (execution-loop (one-instruction state)))
       ((eql state-val 'halted-state)
        out))))
+
+;;; Parsing
+
+;; Apre file in una lista, ogni riga diventa un elemento
+;; della lista di tipo stringa
+(defun read-list-from (input-stream)
+  (let ((e (read-line input-stream nil 'eof)))
+    (unless (eq e 'eof)
+      (append (list e) (read-list-from input-stream)))))
+
+(defun lmc-open-file (file-name)
+  (with-open-file
+    (in file-name :direction :input :if-does-not-exist :error)
+    (read-list-from in)))
+
+;; rimuove commenti
+(defun remove-comment (line)
+  (subseq line 0 (search "//" line)))
+
+;; lowercase e trim
+(defun format-line (line)
+  (string-downcase
+   (string-trim '(#\Space #\Tab #\Newline)
+                (remove-comment line))))
+
+(defun remove-empty-lines (lst)
+  (cond ((null lst) nil)
+        ((equal (first lst) "")
+         (remove-empty-lines (rest lst)))
+        (T (cons (first lst) (remove-empty-lines (rest lst))))))
+
+(defun format-list (lmc-lst)
+  (let ((new-lst (mapcar 'format-line lmc-lst)))
+    (remove-empty-lines new-lst)))
+
+
+;; parse labels
+(defun parse-labels (lst)
+  (cond ((null lst) nil)
+    ((eql (find (read-from-string (first lst))
+                '(add sub sta lda bra brz brp inp out hlt dat)
+                :test #'equal) NIL)
+     (cons (read-from-string (first lst)) (parse-labels (rest lst))))
+    (T (cons 0 (parse-labels (rest lst))))))
+
+(defun remove-labels (mem lab)
+  (cond ((null mem) nil)
+    ((equal (find (read-from-string (first mem)) lab)
+            (read-from-string (first mem)))
+     (cons (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem))))
+           (remove-labels (rest mem) lab)))
+    (T (cons (first mem) (remove-labels (rest mem) lab)))))
+
+;; parse instruction
+(defun get-op-code (mem lab)
+  (cond ((null mem) nil)
+    ((equal (read-from-string (first mem)) 'add)
+     (cons (+ 100 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'sub)
+     (cons (+ 200 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'sta)
+     (cons (+ 300 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'lda)
+     (cons (+ 500 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'bra)
+     (cons (+ 600 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'brz)
+     (cons (+ 700 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'brp)
+     (cons (+ 800 (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                        (subseq (first mem) (search " " (first mem)))) lab))
+           (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'inp)
+     (cons 901 (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'out)
+     (cons 902 (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'hlt)
+     (cons 000 (get-op-code (rest mem) lab)))
+    ((equal (read-from-string (first mem)) 'dat)
+     (if (equal (string-trim '(#\Space #\Tab #\Newline) (first mem)) "dat")
+       (cons 000 (get-op-code (rest mem) lab))
+       (cons (find-addr (string-trim '(#\Space #\Tab #\Newline)
+                          (subseq (first mem) (search " " (first mem)))) lab)
+             (get-op-code (rest mem) lab))))
+    (T (cons (first mem) (remove-labels (rest mem) lab)))))
+
+;; trova indirizzo: se la stringa è un numero ritorna l'integer
+;; altrimenti trova il valore corrispondente alla label
+(defun find-addr (string lab)
+  (if (numberp (read-from-string string))
+    (parse-integer string)
+    (position (read-from-string string) lab)))
+(defun pad-mem (lst)
+  (append lst (make-list (- 100 (length lst)) :initial-element 0)))
+
+(defun lmc-load (file-name)
+  (let ((formatted-lst (format-list (lmc-open-file file-name))))
+    (let ((label-lst (parse-labels formatted-lst)))
+      (pad-mem
+       (get-op-code
+        (remove-labels formatted-lst label-lst) label-lst)))))
+
+(defun lmc-run (file-name inp)
+  (execution-loop (list 'state
+                        :acc 0
+                        :pc 0
+                        :mem (lmc-load file-name)
+                        :in inp
+                        :out ()
+                        :flag 'noflag)))
