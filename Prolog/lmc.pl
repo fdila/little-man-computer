@@ -1,7 +1,9 @@
 %% -*- Mode: Prolog -*-
-%% Federica Di Lauro 829470
+%%%% Federica Di Lauro 829470
+
 :- use_module(library(readutil)).
-% Addizione
+
+%%% Addizione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
 		state(Acc2, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -11,7 +13,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
     nth0(Pos, Mem, Num, _),
     lmc_sum(Acc, Num, Acc2, Flag),
     PC2 is mod(PC + 1, 100), !.
-%Sottrazione
+%%% Sottrazione
 one_instruction(state(Acc, PC, Mem, In, Out, _),
 		state(Acc2, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -21,7 +23,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
     nth0(Pos, Mem, Num, _),
     lmc_sub(Acc, Num, Acc2, Flag),
     PC2 is mod(PC + 1, 100), !.
-%Store
+%%% Store
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		state(Acc, PC2, Mem2, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -32,7 +34,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
     nth0(Pos, Mem2, Acc, Rest),
     PC2 is mod(PC + 1, 100), !.
 
-%Load
+%%% Load
 one_instruction(state(_, PC, Mem, In, Out, Flag),
 		state(Acc2, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -42,7 +44,7 @@ one_instruction(state(_, PC, Mem, In, Out, Flag),
     nth0(Pos, Mem, Acc2, _),
     PC2 is mod(PC + 1, 100), !.
 
-%Branch
+%%% Branch
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		state(Acc, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -50,7 +52,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
     Inst < 700,
     PC2 is Inst - 600, !.
 
-%Branch if zero
+%%% Branch if zero
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		state(Acc, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -59,7 +61,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
     PCBranch is Inst - 700,
     lmc_branch_zero(Acc, PC, PCBranch, Flag, PC2), !.
 
-%Branch if positive
+%%% Branch if positive
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		state(Acc, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -67,14 +69,14 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
     Inst < 900,
     PCBranch is Inst - 800,
     lmc_branch_positive(PC, PCBranch, Flag, PC2), !.
-%Input
+%%% Input
 one_instruction(state(_, PC, Mem, In, Out, Flag),
 		state(Acc2, PC2, Mem, In2, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
     Inst = 901,
     nth0(0, In, Acc2, In2),
     PC2 is mod(PC + 1, 100), !.
-%Output
+%%% Output
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		state(Acc, PC2, Mem, In, Out2, Flag)) :-
     nth0(PC, Mem, Inst, _),
@@ -82,52 +84,63 @@ one_instruction(state(Acc, PC, Mem, In, Out, Flag),
     append(Out, [Acc], Out2),
     PC2 is mod(PC + 1, 100), !.
 
-%Halt
+%%% Halt
 one_instruction(state(Acc, PC, Mem, In, Out, Flag),
 		halted_state(Acc, PC2, Mem, In, Out, Flag)) :-
     nth0(PC, Mem, Inst, _),
     Inst < 100,
     PC2 is mod(PC + 1, 100), !.
 
-%Predicati richiamati dalle one_instruction
+%%% Predicati richiamati dalle one_instruction
+
+%%% somma modulo 1000, accende il flag in caso la somma sia maggiore di 999
 lmc_sum(Acc, Num, Acc2, noflag) :-
     Acc2 is Acc + Num, Acc2 < 1000, !.
 lmc_sum(Acc, Num, Acc2, flag) :-
     Acc2 is Acc + Num - 1000.
 
+%%% sottrazione mod 1000, accende il flag in caso il risultato sia minore di 0
 lmc_sub(Acc, Num, Acc2, noflag) :-
     Acc2 is Acc - Num, Acc2 >= 0, !.
 lmc_sub(Acc, Num, Acc2, flag) :-
     Acc2 is Acc - Num + 1000.
 
+%%% imposta il pc a pcbranch se l'accumulatore è 0 e il flag è spento
 lmc_branch_zero(0, _, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_zero(_, PC, _, _, PC2) :-
     PC2 is mod(PC + 1, 100), !.
 
+%%% imposta il pc a pcbranch se il flag è spento
 lmc_branch_positive(_, PCBranch, noflag, PCBranch) :- !.
 lmc_branch_positive(PC, _, flag, PC2) :-
     PC2 is mod(PC + 1, 100), !.
 
-%Execution_loop
+%%% Execution Loop:
+%%% esegue one_instruction fino a che non incontra un halted_state
 execution_loop(halted_state(_, _, _, _, Out, _), Out).
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
     length(Mem, 100),
     one_instruction(state(Acc, PC, Mem, In, Out, Flag),	NewState),
     execution_loop(NewState, Out2).
 
-%Operazioni di manipolazione del file
+%%%% Operazioni di manipolazione del file
+
+%%% Apertura file, conversione in lowercase
+%%% restituzione di lista in cui ogni elemento è una riga del file
 lmc_open_file(File, List) :-
     read_file_to_codes(File, X, []),
     string_codes(Y, X),
     string_lower(Y, String),
     split_string(String, "\n", "", List).
 
+%%% rimozione degli spazi
 lmc_remove_initial_spaces([],[]).
 lmc_remove_initial_spaces([H|T], [H2|Z]) :-
     split_string(H, "", "\s\t\n", List),
     nth0(0, List, H2, _),
     lmc_remove_initial_spaces(T, Z).
 
+%%% rimozione delle righe di solo commento
 lmc_remove_comment_line([],[]).
 lmc_remove_comment_line([H|T], Z) :-
     sub_string(H, Before, _, _, "//"),
@@ -136,6 +149,7 @@ lmc_remove_comment_line([H|T], Z) :-
 lmc_remove_comment_line([H|T], [H|Z]) :-
     lmc_remove_comment_line(T, Z), !.
 
+%%% rimozione delle righe vuote
 lmc_remove_empty_line([],[]).
 lmc_remove_empty_line([H|T], Z) :-
     H = "",
@@ -143,11 +157,14 @@ lmc_remove_empty_line([H|T], Z) :-
 lmc_remove_empty_line([H|T], [H|Z]) :-
     lmc_remove_empty_line(T, Z), !.
 
+%%% formatta la lista richiamando i predicati definiti precedentemente
 lmc_format_instruction_list(List, NewList) :-
     lmc_remove_initial_spaces(List, X),
     lmc_remove_comment_line(X, Y),
     lmc_remove_empty_line(Y, NewList).
 
+%%% trova labels e le salva in una lista nella posizione corrispondente
+%%% al numero di riga, se la riga non ha una label iniziale è presente 0
 lmc_parse_labels([],[],[]).
 lmc_parse_labels([H|T], [Y|Z], [0|Xs]) :-
     split_string(H, "//", " ", [X|_]),
@@ -162,6 +179,9 @@ lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
     nth0(0, Y, Label, Rest), !,
     lmc_parse_labels(T, Z, Xs).
 
+%%% conversione delle istruzioni nel loro codice numerico
+
+%% add
 lmc_parse_instructions([],[],_).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "add",
@@ -177,6 +197,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% sub
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sub",
     OpN = 200,
@@ -191,6 +212,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% store
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sta",
     OpN = 300,
@@ -205,6 +227,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% load
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "lda",
     OpN = 500,
@@ -219,6 +242,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% branch
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "bra",
     OpN = 600,
@@ -233,6 +257,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% branch if zero
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brz",
     OpN = 700,
@@ -247,6 +272,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% branch if positive
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brp",
     OpN = 800,
@@ -261,21 +287,25 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
+%% input
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "inp", !,
     MemCode = 901,
     lmc_parse_instructions(T, Z, Labels).
 
+%% output
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "out", !,
     MemCode = 902,
     lmc_parse_instructions(T, Z, Labels).
 
+%% halt
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "hlt", !,
     MemCode = 000,
     lmc_parse_instructions(T, Z, Labels).
 
+%% dat: non una vera e propria istruzione, salva in memoria 0 o il numero XX
 lmc_parse_instructions([[Op, Ind]|T], [IndN| Z], Labels) :-
     Op = "dat" ,
     number_string(IndN,Ind), !,
@@ -289,6 +319,9 @@ lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
     Op = "dat",!,
     lmc_parse_instructions(T, Z, Labels).
 
+%%% dopo aver convertito il file nella lista mem aggiungo zeri
+%%% per raggiungere la lunghezza 100
+%% (la memoria deve avere esattamente 100 elementi)
 lmc_pad_mem(Mem, PadMem) :-
     length(Mem,Length),
     Length < 100, !,
@@ -296,7 +329,7 @@ lmc_pad_mem(Mem, PadMem) :-
     lmc_pad_mem(NewMem, PadMem).
 lmc_pad_mem(Mem, Mem) :- !.
 
-%Caricamento in memoria del file
+%%% Caricamento in memoria del file
 lmc_load(File, PadMem) :-
     lmc_open_file(File, List),
     lmc_format_instruction_list(List, FormattedList),
@@ -306,7 +339,7 @@ lmc_load(File, PadMem) :-
     Length =< 100,
     lmc_pad_mem(Mem,PadMem).
 
-%Esecuzione del file
+%%% Esecuzione del file
 lmc_run(File, In, Out) :-
     lmc_load(File, Mem), !,
     execution_loop(state(0, 0, Mem, In, [], noflag), Out).
