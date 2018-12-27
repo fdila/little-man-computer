@@ -1,3 +1,6 @@
+;;;; Federica Di Lauro 829470
+
+;; One instruction
 (defun one-instruction (state)
   (let
     ((state-val (nth 0 state))
@@ -155,17 +158,17 @@
                :out out
                :flag flag))))))
 
+;; Chiama ricorsivamente l'execution loop fino a che non trova halted-state
 (defun execution-loop (state)
   (let ((state-val (nth 0 state))
         (out (nth 10 state)))
-    ; chiama ricorsivamente l'execution loop fino a che non trova halted-state
     (cond
       ((eql state-val 'state)
        (execution-loop (one-instruction state)))
       ((eql state-val 'halted-state)
        out))))
 
-;;; Parsing
+;;;; Parsing
 
 ;; Apre file in una lista, ogni riga diventa un elemento
 ;; della lista di tipo stringa
@@ -189,12 +192,14 @@
    (string-trim '(#\Space #\Tab #\Newline)
                 (remove-comment line))))
 
+;; rimuove linee vuote
 (defun remove-empty-lines (lst)
   (cond ((null lst) nil)
         ((equal (first lst) "")
          (remove-empty-lines (rest lst)))
         (T (cons (first lst) (remove-empty-lines (rest lst))))))
 
+;; richiama funzioni precedentemente definite per formattare la lista
 (defun format-list (lmc-lst)
   (let ((new-lst (mapcar 'format-line lmc-lst)))
     (remove-empty-lines new-lst)))
@@ -209,6 +214,7 @@
      (cons (read-from-string (first lst)) (parse-labels (rest lst))))
     (T (cons 0 (parse-labels (rest lst))))))
 
+;; rimuove le labels da tutte le righe
 (defun remove-labels (mem lab)
   (cond ((null mem) nil)
     ((equal (find (read-from-string (first mem)) lab)
@@ -221,46 +227,58 @@
 ;; parse instruction
 (defun get-op-code (mem lab)
   (cond ((null mem) nil)
+    ;; ADD
     ((equal (read-from-string (first mem)) 'add)
      (cons (+ 100 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; SUB
     ((equal (read-from-string (first mem)) 'sub)
      (cons (+ 200 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; STORE
     ((equal (read-from-string (first mem)) 'sta)
      (cons (+ 300 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; LOAD
     ((equal (read-from-string (first mem)) 'lda)
      (cons (+ 500 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; BRANCH
     ((equal (read-from-string (first mem)) 'bra)
      (cons (+ 600 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; BRANCH IF ZERO
     ((equal (read-from-string (first mem)) 'brz)
      (cons (+ 700 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; BRANCH IF POSITIVE
     ((equal (read-from-string (first mem)) 'brp)
      (cons (+ 800 (find-addr (string-trim '(#\Space #\Tab #\Newline)
                         (subseq (first mem) (search " " (first mem)))) lab))
            (get-op-code (rest mem) lab)))
+    ;; INPUT
     ((equal (read-from-string (first mem)) 'inp)
      (cons 901 (get-op-code (rest mem) lab)))
+    ;; OUTPUT
     ((equal (read-from-string (first mem)) 'out)
      (cons 902 (get-op-code (rest mem) lab)))
+    ;; HALT
     ((equal (read-from-string (first mem)) 'hlt)
      (cons 000 (get-op-code (rest mem) lab)))
+    ;; DAT
     ((equal (read-from-string (first mem)) 'dat)
      (if (equal (string-trim '(#\Space #\Tab #\Newline) (first mem)) "dat")
        (cons 000 (get-op-code (rest mem) lab))
        (cons (find-addr (string-trim '(#\Space #\Tab #\Newline)
                           (subseq (first mem) (search " " (first mem)))) lab)
              (get-op-code (rest mem) lab))))
+    ;; ricorsione
     (T (cons (first mem) (remove-labels (rest mem) lab)))))
 
 ;; trova indirizzo: se la stringa è un numero ritorna l'integer
@@ -272,9 +290,11 @@
       (error "label non esistente")
       (position (read-from-string string) lab))))
 
+;; aggiungo 0 alla memoria per arrivare alla lunghezza 100
 (defun pad-mem (lst)
   (append lst (make-list (- 100 (length lst)) :initial-element 0)))
 
+;; caricamento file in una lista che rappresenta la memoria
 (defun lmc-load (file-name)
   (let ((formatted-lst (format-list (lmc-open-file file-name))))
     (let ((label-lst (parse-labels formatted-lst)))
@@ -282,11 +302,12 @@
        (get-op-code
         (remove-labels formatted-lst label-lst) label-lst)))))
 
+;; caricamento ed esecuzione file
 (defun lmc-run (file-name inp)
   (execution-loop (list 'state
                         :acc 0
                         :pc 0
-                        :mem (lmc-load file-name)
+                        :mem (lmc-load file-name) ;carica file in mem
                         :in inp
                         :out ()
                         :flag 'noflag)))
