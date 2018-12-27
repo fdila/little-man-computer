@@ -268,7 +268,10 @@
 (defun find-addr (string lab)
   (if (numberp (read-from-string string))
     (parse-integer string)
-    (position (read-from-string string) lab)))
+    (if (eql (find (read-from-string string) lab :test #'equal) NIL)
+      (error "label non esistente")
+      (position (read-from-string string) lab))))
+
 (defun pad-mem (lst)
   (append lst (make-list (- 100 (length lst)) :initial-element 0)))
 
