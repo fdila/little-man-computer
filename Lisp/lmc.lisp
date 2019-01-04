@@ -13,6 +13,10 @@
     (let
       ((inst (nth pc mem))
        (pc-inc (mod (+ pc 1) 100)))
+      (write pc)
+      (write-char #\-)
+      (write acc)
+      (write-char #\Space)
       (cond
         ;; Gestione istruzione non esistente
         ((or (eql inst 900)
@@ -43,7 +47,7 @@
         ;; SUB
         ((and (> inst 199) (< inst 300))
          (let ((sub (- acc (nth (- inst 200) mem))))
-           (if (> sub 0)
+           (if (>= sub 0)
              (list 'state
                    :acc sub
                    :pc pc-inc
