@@ -13,10 +13,6 @@
     (let
       ((inst (nth pc mem))
        (pc-inc (mod (+ pc 1) 100)))
-      (write pc)
-      (write-char #\-)
-      (write acc)
-      (write-char #\Space)
       (cond
         ;; Gestione istruzione non esistente
         ((or (eql inst 900)
