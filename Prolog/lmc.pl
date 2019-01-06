@@ -181,7 +181,7 @@ lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
 
 %%% conversione delle istruzioni nel loro codice numerico
 
-%% add
+%%% add
 lmc_parse_instructions([],[],_).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "add",
@@ -197,7 +197,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% sub
+%%% sub
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sub",
     OpN = 200,
@@ -212,7 +212,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% store
+%%% store
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sta",
     OpN = 300,
@@ -227,7 +227,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% load
+%%% load
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "lda",
     OpN = 500,
@@ -242,7 +242,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% branch
+%%% branch
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "bra",
     OpN = 600,
@@ -257,7 +257,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% branch if zero
+%%% branch if zero
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brz",
     OpN = 700,
@@ -272,7 +272,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% branch if positive
+%%% branch if positive
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brp",
     OpN = 800,
@@ -287,33 +287,29 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
 
-%% input
+%%% input
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "inp", !,
     MemCode = 901,
     lmc_parse_instructions(T, Z, Labels).
 
-%% output
+%%% output
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "out", !,
     MemCode = 902,
     lmc_parse_instructions(T, Z, Labels).
 
-%% halt
+%%% halt
 lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
     Op = "hlt", !,
     MemCode = 000,
     lmc_parse_instructions(T, Z, Labels).
 
-%% dat: non una vera e propria istruzione, salva in memoria 0 o il numero XX
+%%% dat: non una vera e propria istruzione, salva in memoria 0 o il numero XXX
 lmc_parse_instructions([[Op, Ind]|T], [IndN| Z], Labels) :-
     Op = "dat" ,
     number_string(IndN,Ind), !,
     IndN < 1000,
-    lmc_parse_instructions(T, Z, Labels).
-lmc_parse_instructions([[Op, Ind]|T], [IndN | Z], Labels) :-
-    Op = "dat",
-    nth0(IndN, Labels, Ind, _), !,
     lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
     Op = "dat",!,
@@ -321,7 +317,7 @@ lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
 
 %%% dopo aver convertito il file nella lista mem aggiungo zeri
 %%% per raggiungere la lunghezza 100
-%% (la memoria deve avere esattamente 100 elementi)
+%%% (la memoria deve avere esattamente 100 elementi)
 lmc_pad_mem(Mem, PadMem) :-
     length(Mem,Length),
     Length < 100, !,

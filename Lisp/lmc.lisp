@@ -1,6 +1,6 @@
 ;;;; Federica Di Lauro 829470
 
-;; One instruction
+;;; One instruction
 (defun one-instruction (state)
   (let
     ((state-val (nth 0 state))
@@ -170,8 +170,8 @@
 
 ;;;; Parsing
 
-;; Apre file in una lista, ogni riga diventa un elemento
-;; della lista di tipo stringa
+;;; Apre file in una lista, ogni riga diventa un elemento
+;;; della lista, di tipo stringa
 (defun read-list-from (input-stream)
   (let ((e (read-line input-stream nil 'eof)))
     (unless (eq e 'eof)
@@ -182,30 +182,30 @@
     (in file-name :direction :input :if-does-not-exist :error)
     (read-list-from in)))
 
-;; rimuove commenti
+;;; rimuove commenti
 (defun remove-comment (line)
   (subseq line 0 (search "//" line)))
 
-;; lowercase e trim
+;;; lowercase e trim
 (defun format-line (line)
   (string-downcase
    (string-trim '(#\Space #\Tab #\Newline)
                 (remove-comment line))))
 
-;; rimuove linee vuote
+;;; rimuove linee vuote
 (defun remove-empty-lines (lst)
   (cond ((null lst) nil)
         ((equal (first lst) "")
          (remove-empty-lines (rest lst)))
         (T (cons (first lst) (remove-empty-lines (rest lst))))))
 
-;; richiama funzioni precedentemente definite per formattare la lista
+;;; richiama funzioni precedentemente definite per formattare la lista
 (defun format-list (lmc-lst)
   (let ((new-lst (mapcar 'format-line lmc-lst)))
     (remove-empty-lines new-lst)))
 
 
-;; parse labels
+;;; parse labels
 (defun parse-labels (lst)
   (cond ((null lst) nil)
     ((eql (find (read-from-string (first lst))
@@ -214,7 +214,7 @@
      (cons (read-from-string (first lst)) (parse-labels (rest lst))))
     (T (cons 0 (parse-labels (rest lst))))))
 
-;; rimuove le labels da tutte le righe
+;;; rimuove le labels da tutte le righe
 (defun remove-labels (mem lab)
   (cond ((null mem) nil)
     ((equal (find (read-from-string (first mem)) lab)
@@ -224,7 +224,7 @@
            (remove-labels (rest mem) lab)))
     (T (cons (first mem) (remove-labels (rest mem) lab)))))
 
-;; parse instruction
+;;; parse instruction
 (defun get-op-code (mem lab)
   (cond ((null mem) nil)
     ;; ADD
@@ -275,14 +275,14 @@
     ((equal (read-from-string (first mem)) 'dat)
      (if (equal (string-trim '(#\Space #\Tab #\Newline) (first mem)) "dat")
        (cons 000 (get-op-code (rest mem) lab))
-       (cons (find-addr (string-trim '(#\Space #\Tab #\Newline)
-                          (subseq (first mem) (search " " (first mem)))) lab)
+       (cons (parse-integer (string-trim '(#\Space #\Tab #\Newline)
+                          (subseq (first mem) (search " " (first mem)))))
              (get-op-code (rest mem) lab))))
     ;; ricorsione
     (T (cons (first mem) (remove-labels (rest mem) lab)))))
 
-;; trova indirizzo: se la stringa è un numero ritorna l'integer
-;; altrimenti trova il valore corrispondente alla label
+;;; trova indirizzo: se la stringa è un numero ritorna l'integer
+;;; altrimenti trova il valore corrispondente alla label
 (defun find-addr (string lab)
   (if (numberp (read-from-string string))
     (parse-integer string)
@@ -290,11 +290,11 @@
       (error "label non esistente")
       (position (read-from-string string) lab))))
 
-;; aggiungo 0 alla memoria per arrivare alla lunghezza 100
+;;; aggiungo 0 alla memoria per arrivare alla lunghezza 100
 (defun pad-mem (lst)
   (append lst (make-list (- 100 (length lst)) :initial-element 0)))
 
-;; caricamento file in una lista che rappresenta la memoria
+;;; caricamento file in una lista che rappresenta la memoria
 (defun lmc-load (file-name)
   (let ((formatted-lst (format-list (lmc-open-file file-name))))
     (let ((label-lst (parse-labels formatted-lst)))
@@ -302,7 +302,7 @@
        (get-op-code
         (remove-labels formatted-lst label-lst) label-lst)))))
 
-;; caricamento ed esecuzione file
+;;; caricamento ed esecuzione file
 (defun lmc-run (file-name inp)
   (execution-loop (list 'state
                         :acc 0
