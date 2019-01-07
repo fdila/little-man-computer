@@ -18,10 +18,12 @@
         ((or (eql inst 900)
              (and (> inst 902))
              (and (> inst 399) (< inst 500)))
-         (error "Errore, istruzione non valida"))
+         (write-line "Errore, istruzione non valida")
+         NIL)
         ;; Gestione one-instruction su halted-state
         ((eql state-val 'halted-state)
-         (error "Errore, istruzione non eseguibile se lo state è halted"))
+         (write-line "Errore, istruzione non eseguibile se lo state è halted")
+         NIL)
         ;; ADD
         ((and (> inst 99) (< inst 200))
          (let ((sum (+ acc (nth (- inst 100) mem))))
@@ -130,7 +132,9 @@
          (let ((acc-new (first in))
                (in-new (rest in)))
            (if (eql acc-new NIL)
-             (error "Istruzione di input con :in vuoto")
+             (progn
+               (write-line "Istruzione di input con :in vuoto")
+               NIL)
              (list 'state
                    :acc acc-new
                    :pc pc-inc
@@ -287,7 +291,9 @@
   (if (numberp (read-from-string string))
     (parse-integer string)
     (if (eql (find (read-from-string string) lab :test #'equal) NIL)
-      (error "label non esistente")
+      (progn
+       (write-line "Label non esistente")
+       NIL)
       (position (read-from-string string) lab))))
 
 ;;; aggiungo 0 alla memoria per arrivare alla lunghezza 100
