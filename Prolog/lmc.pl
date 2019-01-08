@@ -20,7 +20,7 @@ one_instruction(state(Acc, PC, Mem, In, Out, _),
     Inst > 199,
     Inst < 300,
     Pos is Inst - 200,
-    nth0(Pos, Mem, Num, _),
+    nth0(Pos, Mem, Num, _), 
     lmc_sub(Acc, Num, Acc2, Flag),
     PC2 is mod(PC + 1, 100), !.
 %%% Store
@@ -120,7 +120,7 @@ lmc_branch_positive(PC, _, flag, PC2) :-
 execution_loop(halted_state(_, _, _, _, Out, _), Out).
 execution_loop(state(Acc, PC, Mem, In, Out, Flag), Out2) :-
     length(Mem, 100),
-    one_instruction(state(Acc, PC, Mem, In, Out, Flag),	NewState),
+    one_instruction(state(Acc, PC, Mem, In, Out, Flag), 	NewState),
     execution_loop(NewState, Out2).
 
 %%%% Operazioni di manipolazione del file
@@ -134,14 +134,14 @@ lmc_open_file(File, List) :-
     split_string(String, "\n", "", List).
 
 %%% rimozione degli spazi
-lmc_remove_initial_spaces([],[]).
+lmc_remove_initial_spaces([], []).
 lmc_remove_initial_spaces([H|T], [H2|Z]) :-
     split_string(H, "", "\s\t\n", List),
     nth0(0, List, H2, _),
     lmc_remove_initial_spaces(T, Z).
 
 %%% rimozione delle righe di solo commento
-lmc_remove_comment_line([],[]).
+lmc_remove_comment_line([], []).
 lmc_remove_comment_line([H|T], Z) :-
     sub_string(H, Before, _, _, "//"),
     Before = 0, !,
@@ -150,7 +150,7 @@ lmc_remove_comment_line([H|T], [H|Z]) :-
     lmc_remove_comment_line(T, Z), !.
 
 %%% rimozione delle righe vuote
-lmc_remove_empty_line([],[]).
+lmc_remove_empty_line([], []).
 lmc_remove_empty_line([H|T], Z) :-
     H = "",
     lmc_remove_empty_line(T, Z).
@@ -165,7 +165,7 @@ lmc_format_instruction_list(List, NewList) :-
 
 %%% trova labels e le salva in una lista nella posizione corrispondente
 %%% al numero di riga, se la riga non ha una label iniziale è presente 0
-lmc_parse_labels([],[],[]).
+lmc_parse_labels([], [], []).
 lmc_parse_labels([H|T], [Y|Z], [0|Xs]) :-
     split_string(H, "//", " ", [X|_]),
     split_string(X, " ", " ", Y),
@@ -182,11 +182,11 @@ lmc_parse_labels([H|T], [Rest|Z], [Label|Xs]) :-
 %%% conversione delle istruzioni nel loro codice numerico
 
 %%% add
-lmc_parse_instructions([],[],_).
+lmc_parse_instructions([], [], _).
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "add",
     OpN = 100,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -201,7 +201,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sub",
     OpN = 200,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -216,7 +216,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "sta",
     OpN = 300,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -231,7 +231,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "lda",
     OpN = 500,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -246,7 +246,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "bra",
     OpN = 600,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -261,7 +261,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brz",
     OpN = 700,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -276,7 +276,7 @@ lmc_parse_instructions([[Op, Ind]|T], [MemCode | Z], Labels) :-
 lmc_parse_instructions([[Op, Ind]|T], [MemCode| Z], Labels) :-
     Op = "brp",
     OpN = 800,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 100,
     MemCode is OpN + IndN,
     lmc_parse_instructions(T, Z, Labels).
@@ -308,18 +308,18 @@ lmc_parse_instructions([[Op]|T], [MemCode| Z], Labels) :-
 %%% dat: non una vera e propria istruzione, salva in memoria 0 o il numero XXX
 lmc_parse_instructions([[Op, Ind]|T], [IndN| Z], Labels) :-
     Op = "dat" ,
-    number_string(IndN,Ind), !,
+    number_string(IndN, Ind), !,
     IndN < 1000,
     lmc_parse_instructions(T, Z, Labels).
 lmc_parse_instructions([[Op]|T], [0| Z], Labels) :-
-    Op = "dat",!,
+    Op = "dat", !,
     lmc_parse_instructions(T, Z, Labels).
 
 %%% dopo aver convertito il file nella lista mem aggiungo zeri
 %%% per raggiungere la lunghezza 100
 %%% (la memoria deve avere esattamente 100 elementi)
 lmc_pad_mem(Mem, PadMem) :-
-    length(Mem,Length),
+    length(Mem, Length),
     Length < 100, !,
     append(Mem, [0], NewMem),
     lmc_pad_mem(NewMem, PadMem).
@@ -333,7 +333,7 @@ lmc_load(File, PadMem) :-
     lmc_parse_instructions(InstList, Mem, Labels),
     length(Mem, Length),
     Length =< 100,
-    lmc_pad_mem(Mem,PadMem).
+    lmc_pad_mem(Mem, PadMem).
 
 %%% Esecuzione del file
 lmc_run(File, In, Out) :-
